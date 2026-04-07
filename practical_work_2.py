@@ -88,7 +88,79 @@ ws.column_dimensions['F'].width = 10
 ws.column_dimensions['G'].width = 10
 ws.column_dimensions['H'].width = 15
 
-# 7. Сохраняем готовый файл
+# --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 2 ---
+
+# 1. Создаем новый лист в нашей книге
+# Опять же, используем cast, чтобы Pyright понимал, что это Worksheet
+ws2 = cast(Worksheet, wb.create_sheet(title="Задание 2"))
+
+# 2. Оформляем главный заголовок таблицы
+cell_a1_ws2 = cast(Cell, ws2['A1'])
+cell_a1_ws2.value = 'РАСХОД МАТЕРИАЛОВ ДЛЯ ОКРАСКИ'
+ws2.merge_cells('A1:G1') # Объединяем на 7 колонок (от A до G)
+cell_a1_ws2.font = Font(bold=True, size=12)
+cell_a1_ws2.alignment = Alignment(horizontal='center', vertical='center')
+
+# 3. Настраиваем сложную многоуровневую шапку
+headers_ws2 = [
+    ('A2', 'Материал', 'A2:A4'),       # 3 ячейки по вертикали
+    ('B2', 'Поверхность', 'B2:G2'),    # 6 ячеек по горизонтали
+    ('B3', 'Двери', 'B3:D3'),          # 3 ячейки по горизонтали
+    ('E3', 'Окна', 'E3:G3')            # 3 ячейки по горизонтали
+]
+
+for cell_ref, text, merge_range in headers_ws2:
+    current_cell = cast(Cell, ws2[cell_ref])
+    current_cell.value = text
+    ws2.merge_cells(merge_range)
+
+# Добавляем подзаголовки 4-й строки. 
+# Заметь: вместо сложных шрифтов мы используем \u00B2 — это символ квадрата '²'
+subheaders = ['Кг на\n10 м\u00B2', 'Площадь', 'Расход', 'Кг на\n10 м\u00B2', 'Площадь', 'Расход']
+for col_idx, text in enumerate(subheaders, start=2): # Начинаем со 2-го столбца (B)
+    cell = cast(Cell, ws2.cell(row=4, column=col_idx))
+    cell.value = text
+
+# Применяем выравнивание по центру ко всей шапке Задания 2
+for row in ws2['A2:G4']:
+    for cell in row:
+        c = cast(Cell, cell)
+        c.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+        c.font = Font(bold=True)
+
+# 4. Вносим исходные данные
+# Важно: в Python дробные числа пишутся через точку, а не через запятую
+data_ws2 = [
+    ['Олифа', 1.20, 150, 1.35, 362],
+    ['Белила', 0.87, 150, 0.91, 362],
+    ['Пигмент', 0.15, 150, 0.42, 362]
+]
+
+# Записываем данные и формулы начиная с 5-й строки
+for i, row_data in enumerate(data_ws2, start=5):
+    cast(Cell, ws2.cell(row=i, column=1)).value = row_data[0] # Материал
+    
+    # --- Заполняем секцию "Двери" ---
+    cast(Cell, ws2.cell(row=i, column=2)).value = row_data[1] # Кг на 10 м2
+    cast(Cell, ws2.cell(row=i, column=3)).value = row_data[2] # Площадь
+    
+    # Формула: Расход (Двери) = Кг (B) * Площадь (C) / 10
+    cast(Cell, ws2.cell(row=i, column=4)).value = f'=B{i}*C{i}/10'
+    
+    # --- Заполняем секцию "Окна" ---
+    cast(Cell, ws2.cell(row=i, column=5)).value = row_data[3] # Кг на 10 м2
+    cast(Cell, ws2.cell(row=i, column=6)).value = row_data[4] # Площадь
+    
+    # Формула: Расход (Окна) = Кг (E) * Площадь (F) / 10
+    cast(Cell, ws2.cell(row=i, column=7)).value = f'=E{i}*F{i}/10'
+
+# 5. Делаем столбцы чуть шире, чтобы текст не слипался
+ws2.column_dimensions['A'].width = 15
+for col in ['B', 'C', 'D', 'E', 'F', 'G']:
+    ws2.column_dimensions[col].width = 11
+
+# --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 2 ---
+
 filename = 'Практическая работа 2.xlsx'
 wb.save(filename)
-print(f'Готово! Файл "{filename}" успешно создан, а Pyright теперь счастлив.')
+print(f'Готово! Файл "{filename}" успешно обновлен.')
