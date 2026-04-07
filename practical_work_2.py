@@ -310,6 +310,73 @@ ws4.column_dimensions['C'].width = 22
 
 # --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 4 ---
 
+# --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 5 ---
+
+# 1. Создаем пятый лист
+ws5 = cast(Worksheet, wb.create_sheet(title="Задание 5"))
+
+# 2. Оформляем заголовок таблицы
+cell_a1_ws5 = cast(Cell, ws5['A1'])
+cell_a1_ws5.value = 'Показатели производства за 2016 год'
+ws5.merge_cells('A1:F1') # Объединяем на 6 колонок
+cell_a1_ws5.alignment = Alignment(horizontal='center', vertical='center')
+
+# 3. Настраиваем шапку и боковик
+headers_ws5 = ['1 кв.', '2 кв.', '3 кв.', '4 кв.', 'Год']
+for col_idx, text in enumerate(headers_ws5, start=2): # Столбцы с B(2) по F(6)
+    cast(Cell, ws5.cell(row=2, column=col_idx)).value = text
+
+cast(Cell, ws5['A3']).value = 'План (тыс. руб.)'
+cast(Cell, ws5['A4']).value = 'Факт (тыс. руб.)'
+
+cell_a5 = cast(Cell, ws5['A5'])
+cell_a5.value = '% выполнения\nплана'
+cell_a5.alignment = Alignment(wrap_text=True) # Чтобы текст перенесся на две строки
+
+# 4. Вносим исходные данные по кварталам
+plan_data = [1000, 800, 1500, 1100]
+fact_data = [980, 1150, 1200, 1060]
+
+cols = ['B', 'C', 'D', 'E']
+
+for i, col in enumerate(cols):
+    # План (строка 3)
+    cast(Cell, ws5[f'{col}3']).value = plan_data[i]
+    # Факт (строка 4)
+    cast(Cell, ws5[f'{col}4']).value = fact_data[i]
+    
+    # Формула: % выполнения = Факт (4 строка) / План (3 строка)
+    cast(Cell, ws5[f'{col}5']).value = f'={col}4/{col}3'
+
+# 5. Считаем столбец "Год" (F)
+# Автосумма по строкам 3 и 4
+cast(Cell, ws5['F3']).value = '=SUM(B3:E3)'
+cast(Cell, ws5['F4']).value = '=SUM(B4:E4)'
+# % выполнения за год (Факт года / План года)
+cast(Cell, ws5['F5']).value = '=F4/F3'
+
+# 6. Применяем процентный формат к 5-й строке
+# '0%' означает целое число с процентом (например, 98%)
+for col in ['B', 'C', 'D', 'E', 'F']:
+    cast(Cell, ws5[f'{col}5']).number_format = '0.0%'
+
+# 7. УСЛОВНОЕ ФОРМАТИРОВАНИЕ (< 100%)
+# Задаем светло-красную заливку и темно-красный текст
+red_fill_5 = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+red_font_5 = Font(color="9C0006")
+
+# Правило: если значение меньше 1 (что равно 100%), красим в красный
+rule5 = CellIsRule(operator='lessThan', formula=['1'], fill=red_fill_5, font=red_font_5)
+
+# Применяем правило к строке процентов (от 1 кв. до 'Год')
+ws5.conditional_formatting.add('B5:F5', rule5)
+
+# 8. Настраиваем ширину столбцов
+ws5.column_dimensions['A'].width = 18
+for col in ['B', 'C', 'D', 'E', 'F']:
+    ws5.column_dimensions[col].width = 10
+
+# --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 5 ---
 
 filename = 'Практическая работа 2.xlsx'
 wb.save(filename)
