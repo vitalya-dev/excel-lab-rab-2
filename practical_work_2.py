@@ -242,6 +242,74 @@ for col in ['B', 'C', 'D', 'E', 'F', 'G', 'H']:
 
 # --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 3 ---
 
+# --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 4 ---
+
+# 1. Создаем четвертый лист
+ws4 = cast(Worksheet, wb.create_sheet(title="Задание 4"))
+
+# 2. Настраиваем шапку таблицы
+headers_ws4 = ['Сумма транзакции', 'Комиссия банка, %', 'Комиссия банка, руб.']
+# Берем примерный светло-синий цвет, как на скриншоте
+blue_fill = PatternFill(start_color="B4C6E7", end_color="B4C6E7", fill_type="solid") 
+
+for col_idx, text in enumerate(headers_ws4, start=1):
+    cell = cast(Cell, ws4.cell(row=1, column=col_idx))
+    cell.value = text
+    cell.fill = blue_fill
+    cell.font = Font(bold=True)
+    cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+# 3. Вносим данные
+# ВАЖНО: Проценты передаем как десятичные дроби (1.5% = 0.015, 2.0% = 0.02)
+data_ws4 = [
+    [10000, 0.015],
+    [150000, 0.020],
+    [7500, 0.010],
+    [11000, 0.015]
+]
+
+for i, row_data in enumerate(data_ws4, start=2):
+    # Сумма транзакции (Столбец A)
+    cast(Cell, ws4.cell(row=i, column=1)).value = row_data[0]
+    
+    # Комиссия банка, % (Столбец B)
+    cast(Cell, ws4.cell(row=i, column=2)).value = row_data[1]
+    
+    # Формула: Комиссия банка, руб (C) = Сумма (A) * Процент (B)
+    cast(Cell, ws4.cell(row=i, column=3)).value = f'=A{i}*B{i}'
+
+# 4. Оформляем строку "Итого"
+ws4.merge_cells('A6:B6') # Объединяем под надпись
+total_label_cell = cast(Cell, ws4['A6'])
+total_label_cell.value = 'Итого:'
+total_label_cell.alignment = Alignment(horizontal='right', vertical='center')
+
+# Формула суммы по столбцу C
+cast(Cell, ws4['C6']).value = '=SUM(C2:C5)'
+
+# Раскрашиваем строку "Итого" в желтый цвет
+yellow_fill = PatternFill(start_color="FFE699", end_color="FFE699", fill_type="solid")
+for col in ['A', 'B', 'C']:
+    cast(Cell, ws4[f'{col}6']).fill = yellow_fill
+
+# 5. Применяем нужные форматы к ячейкам
+# Денежный формат для столбцов A и C (строки со 2 по 6)
+for row_idx in range(2, 7):
+    cast(Cell, ws4[f'A{row_idx}']).number_format = '#,##0 "₽"'
+    cast(Cell, ws4[f'C{row_idx}']).number_format = '#,##0 "₽"'
+    
+# ПРОЦЕНТНЫЙ ФОРМАТ для столбца B (строки со 2 по 5)
+# Формат '0.0%' означает: покажи как процент, и оставь 1 знак после запятой
+for row_idx in range(2, 6):
+    cast(Cell, ws4[f'B{row_idx}']).number_format = '0.0%'
+
+# 6. Настраиваем ширину столбцов, чтобы всё поместилось
+ws4.column_dimensions['A'].width = 18
+ws4.column_dimensions['B'].width = 18
+ws4.column_dimensions['C'].width = 22
+
+# --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 4 ---
+
 
 filename = 'Практическая работа 2.xlsx'
 wb.save(filename)
