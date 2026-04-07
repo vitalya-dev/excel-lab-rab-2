@@ -7,6 +7,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from typing import cast
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.cell.cell import Cell
+from openpyxl.formatting.rule import CellIsRule
 
 # 1. Создаем новую рабочую книгу (файл)
 wb = openpyxl.Workbook()
@@ -160,6 +161,87 @@ for col in ['B', 'C', 'D', 'E', 'F', 'G']:
     ws2.column_dimensions[col].width = 11
 
 # --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 2 ---
+
+# --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 3 ---
+
+# 1. Создаем третий лист
+ws3 = cast(Worksheet, wb.create_sheet(title="Задание 3"))
+
+# 2. Оформляем заголовок "Валовая прибыль"
+cell_a1_ws3 = cast(Cell, ws3['A1'])
+cell_a1_ws3.value = 'Валовая прибыль'
+ws3.merge_cells('A1:H1')
+cell_a1_ws3.alignment = Alignment(horizontal='center', vertical='center')
+cell_a1_ws3.font = Font(bold=True, size=12)
+
+# 3. Настраиваем шапку и боковик (названия строк)
+months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Всего']
+for col_idx, month in enumerate(months, start=2): # Столбцы с B(2) по H(8)
+    cast(Cell, ws3.cell(row=2, column=col_idx)).value = month
+
+row_labels = ['Доходы', 'Расходы', 'Прибыль']
+for row_idx, label in enumerate(row_labels, start=3): # Строки с 3 по 5
+    cast(Cell, ws3.cell(row=row_idx, column=1)).value = label
+
+# 4. Красим шапку и боковик в светло-зеленый цвет (как на картинке)
+green_fill = PatternFill(start_color="C4D79B", end_color="C4D79B", fill_type="solid")
+
+# Красим верхнюю шапку
+for row in ws3['A2:H2']:
+    for cell in row:
+        c = cast(Cell, cell)
+        c.fill = green_fill
+        c.font = Font(bold=True)
+        c.alignment = Alignment(horizontal='center', vertical='center')
+
+# Красим левый боковик
+for row in ws3['A3:A5']:
+    for cell in row:
+        c = cast(Cell, cell)
+        c.fill = green_fill
+        c.font = Font(bold=True)
+
+# 5. Вносим исходные данные
+incomes = [112100, 112850, 148800, 106500, 101150, 79700]
+expenses = [90567, 95100, 105900, 129200, 131000, 84000]
+
+cols = ['B', 'C', 'D', 'E', 'F', 'G']
+
+for i, col in enumerate(cols):
+    cast(Cell, ws3[f'{col}3']).value = incomes[i]
+    cast(Cell, ws3[f'{col}4']).value = expenses[i]
+    
+    # Считаем прибыль: "Доходы" - "Расходы"
+    cast(Cell, ws3[f'{col}5']).value = f'={col}3-{col}4'
+
+# 6. Считаем столбец "Всего" (Сумма по строке)
+for row_idx in [3, 4, 5]:
+    # Формула суммы от колонки B до G для текущей строки
+    cast(Cell, ws3[f'H{row_idx}']).value = f'=SUM(B{row_idx}:G{row_idx})'
+
+# 7. Применяем формат "Рубли" ко всем числам
+for row in ws3['B3:H5']:
+    for cell in row:
+        # Формат с пробелом-разделителем тысяч и знаком рубля
+        cast(Cell, cell).number_format = '#,##0 "₽"'
+
+# 8. УСЛОВНОЕ ФОРМАТИРОВАНИЕ (Магия из задания)
+# Создаем правило: если значение < 0, то красим в светло-красный (и делаем текст темно-красным для красоты)
+red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+red_font = Font(color="9C0006")
+
+rule = CellIsRule(operator='lessThan', formula=['0'], fill=red_fill, font=red_font)
+
+# Применяем правило к строке с прибылью (от января до 'Всего')
+ws3.conditional_formatting.add('B5:H5', rule)
+
+# Настраиваем ширину столбцов
+ws3.column_dimensions['A'].width = 12
+for col in ['B', 'C', 'D', 'E', 'F', 'G', 'H']:
+    ws3.column_dimensions[col].width = 12
+
+# --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 3 ---
+
 
 filename = 'Практическая работа 2.xlsx'
 wb.save(filename)
