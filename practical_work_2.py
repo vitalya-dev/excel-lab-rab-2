@@ -14,7 +14,7 @@ wb = openpyxl.Workbook()
 
 # Успокаиваем Pyright: жестко указываем, что активный лист — это объект Worksheet
 ws = cast(Worksheet, wb.active)
-ws.title = "Практическая работа 2"
+ws.title = "Задание 1"
 
 # 2. Оформляем главный заголовок таблицы
 # Pyright сомневается, одна это ячейка или диапазон, поэтому применяем cast(Cell, ...)
@@ -424,7 +424,75 @@ ws6.column_dimensions['D'].width = 15
 
 # --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 6 ---
 
+# --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 7 ---
 
+# 1. Создаем финальный седьмой лист
+ws7 = cast(Worksheet, wb.create_sheet(title="Задание 7"))
+
+# 2. Настраиваем шапку таблицы
+headers_ws7 = ['Товар', 'Цена\nпрошлого\nмесяца', 'Цена этого\nмесяца', 'Изменение\nцены, %']
+
+# Ярко-зеленая заливка для шапки, как на скриншоте
+header_green_fill = PatternFill(start_color="92D050", end_color="92D050", fill_type="solid")
+
+for col_idx, text in enumerate(headers_ws7, start=1):
+    cell = cast(Cell, ws7.cell(row=1, column=col_idx))
+    cell.value = text
+    cell.fill = header_green_fill
+    cell.font = Font(bold=True)
+    cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+# 3. Вносим исходные данные
+data_ws7 = [
+    ['Корпус Zalman Z9 Plus Black', 4623, 4810],
+    ['Процессор Intel Core i5 Haswell', 18232, 17455],
+    ['Видеокарта GeForce GTX 970', 26400, 28923],
+    ['SSD-диск Kingston SV300S37A/120G4.0', 4041, 3600],
+    ['Принтер HP LaserJet Pro M125ra', 7820, 8866]
+]
+
+for i, row_data in enumerate(data_ws7, start=2):
+    cast(Cell, ws7.cell(row=i, column=1)).value = row_data[0] # Товар
+    cast(Cell, ws7.cell(row=i, column=2)).value = row_data[1] # Цена прошлого
+    cast(Cell, ws7.cell(row=i, column=3)).value = row_data[2] # Цена этого
+    
+    # Формула: Изменение цены = (Цена этого (C) - Цена прошлого (B)) / Цена прошлого (B)
+    cast(Cell, ws7.cell(row=i, column=4)).value = f'=(C{i}-B{i})/B{i}'
+
+# 4. Применяем форматы (Денежный и Процентный)
+for row_idx in range(2, 7):
+    # Рубли для колонок B и C
+    cast(Cell, ws7[f'B{row_idx}']).number_format = '#,##0 "₽"'
+    cast(Cell, ws7[f'C{row_idx}']).number_format = '#,##0 "₽"'
+    # Проценты для колонки D
+    cast(Cell, ws7[f'D{row_idx}']).number_format = '0.0%'
+
+# 5. УСЛОВНОЕ ФОРМАТИРОВАНИЕ (Два правила!)
+# Настраиваем цвета (стандартные экселевские зеленый и красный для таких правил)
+green_fill_cf = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+green_font_cf = Font(color="006100")
+
+red_fill_cf = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+red_font_cf = Font(color="9C0006")
+
+# Правило 1: Меньше нуля -> Зеленый
+rule_green = CellIsRule(operator='lessThan', formula=['0'], fill=green_fill_cf, font=green_font_cf)
+# Правило 2: Больше нуля -> Красный
+rule_red = CellIsRule(operator='greaterThan', formula=['0'], fill=red_fill_cf, font=red_font_cf)
+
+# Применяем оба правила к одному диапазону (столбец D)
+ws7.conditional_formatting.add('D2:D6', rule_green)
+ws7.conditional_formatting.add('D2:D6', rule_red)
+
+# 6. Настраиваем ширину столбцов (первый делаем широким под названия железа)
+ws7.column_dimensions['A'].width = 35
+ws7.column_dimensions['B'].width = 15
+ws7.column_dimensions['C'].width = 15
+ws7.column_dimensions['D'].width = 15
+
+# --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 7 ---
+
+# ФИНАЛЬНОЕ СОХРАНЕНИЕ (Убедись, что эти строки у тебя в самом конце файла)
 filename = 'Практическая работа 2.xlsx'
 wb.save(filename)
-print(f'Готово! Файл "{filename}" успешно обновлен.')
+print(f'Бро, мы это сделали! Файл "{filename}" готов, все 7 листов на месте!')
