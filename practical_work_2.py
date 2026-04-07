@@ -378,6 +378,53 @@ for col in ['B', 'C', 'D', 'E', 'F']:
 
 # --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 5 ---
 
+# --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 6 ---
+
+# 1. Создаем шестой лист
+ws6 = cast(Worksheet, wb.create_sheet(title="Задание 6"))
+
+# 2. Настраиваем шапку таблицы
+headers_ws6 = ['Сотрудник', 'Продажи', 'Возврат', '% возврата']
+# Подбираем серо-синий цвет заливки, как на образце
+grey_blue_fill = PatternFill(start_color="95B3D7", end_color="95B3D7", fill_type="solid")
+
+for col_idx, text in enumerate(headers_ws6, start=1):
+    cell = cast(Cell, ws6.cell(row=1, column=col_idx))
+    cell.value = text
+    cell.fill = grey_blue_fill
+    cell.font = Font(bold=True)
+    cell.alignment = Alignment(horizontal='center', vertical='center')
+
+# 3. Вносим данные
+data_ws6 = [
+    ['Петров', 35682, 2023],
+    ['Иванова', 25686, 3522],
+    ['Сидоров', 56862, 2356]
+]
+
+for i, row_data in enumerate(data_ws6, start=2):
+    # Данные по сотруднику
+    cast(Cell, ws6.cell(row=i, column=1)).value = row_data[0] # Сотрудник
+    cast(Cell, ws6.cell(row=i, column=2)).value = row_data[1] # Продажи
+    cast(Cell, ws6.cell(row=i, column=3)).value = row_data[2] # Возврат
+    
+    # Формула: % возврата (Столбец D) = Возврат (C) / Продажи (B)
+    cast(Cell, ws6.cell(row=i, column=4)).value = f'=C{i}/B{i}'
+
+# 4. Настраиваем процентный формат для столбца D
+for row_idx in range(2, 5):
+    # Оставим 1 знак после запятой, чтобы данные были точнее
+    cast(Cell, ws6[f'D{row_idx}']).number_format = '0.0%'
+
+# 5. Настраиваем ширину столбцов
+ws6.column_dimensions['A'].width = 15
+ws6.column_dimensions['B'].width = 12
+ws6.column_dimensions['C'].width = 12
+ws6.column_dimensions['D'].width = 15
+
+# --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 6 ---
+
+
 filename = 'Практическая работа 2.xlsx'
 wb.save(filename)
 print(f'Готово! Файл "{filename}" успешно обновлен.')
