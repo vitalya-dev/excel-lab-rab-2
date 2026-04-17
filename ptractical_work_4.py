@@ -1,6 +1,13 @@
 import openpyxl
 from openpyxl.styles import Alignment, Font, PatternFill
-from openpyxl.chart import BarChart, PieChart3D, ScatterChart, Reference, Series
+from openpyxl.chart import (
+    BarChart, 
+    PieChart, 
+    PieChart3D, 
+    ScatterChart, 
+    Reference, 
+    Series
+)
 from openpyxl.chart.label import DataLabelList
 from typing import cast
 from openpyxl.worksheet.worksheet import Worksheet
@@ -235,8 +242,76 @@ chart10.series.append(series10)
 ws10.add_chart(chart10, "D2")
 
 # ==========================================
+# ДЗ 9. ЗАДАНИЕ 1: ОКЕАНЫ (КРУГОВАЯ ДИАГРАММА)
+# ==========================================
+ws_dz1 = cast(Worksheet, wb.create_sheet(title="ДЗ 9 Задание 1"))
+ws_dz1['A1'], ws_dz1['B1'] = 'Океан', 'Площадь (млн км\u00B2)'
+ws_dz1['A1'].font = ws_dz1['B1'].font = Font(bold=True)
+
+# Данные о площадях океанов
+oceans_data = [
+    ['Тихий', 165.2],
+    ['Атлантический', 106.5],
+    ['Индийский', 70.6],
+    ['Южный', 20.3],
+    ['Северный Ледовитый', 14.1]
+]
+
+for i, (name, area) in enumerate(oceans_data, start=2):
+    ws_dz1.cell(row=i, column=1, value=name)
+    ws_dz1.cell(row=i, column=2, value=area)
+
+ws_dz1.column_dimensions['A'].width = 20
+ws_dz1.column_dimensions['B'].width = 20
+
+# Строим круговую диаграмму
+ocean_chart = PieChart()
+ocean_chart.title = "Соотношение площадей океанов"
+# Включаем проценты
+ocean_chart.dataLabels = DataLabelList()
+ocean_chart.dataLabels.showPercent = True
+
+data_ref = Reference(ws_dz1, min_col=2, min_row=2, max_row=6)
+cats_ref = Reference(ws_dz1, min_col=1, min_row=2, max_row=6)
+ocean_chart.add_data(data_ref)
+ocean_chart.set_categories(cats_ref)
+
+ws_dz1.add_chart(ocean_chart, "D2")
+
+# ==========================================
+# ДЗ 9. ЗАДАНИЕ 2: y = sin(10x) / sin(x)
+# ==========================================
+ws_dz2 = cast(Worksheet, wb.create_sheet(title="ДЗ 9 Задание 2"))
+ws_dz2['A1'], ws_dz2['B1'] = 'X', 'Y'
+ws_dz2['A1'].font = ws_dz2['B1'].font = Font(bold=True)
+
+# Генерируем данные на отрезке [-5, 5] с шагом 0.1
+curr_x, curr_row = -5.0, 2
+while curr_x <= 5.01:
+    ws_dz2.cell(row=curr_row, column=1, value=curr_x).number_format = '0.0'
+    # Используем формулу Excel. 
+    # Внимание: при x=0 будет деление на ноль, Excel это обработает сам
+    ws_dz2.cell(row=curr_row, column=2, value=f'=SIN(10*A{curr_row})/SIN(A{curr_row})').number_format = '0.00'
+    curr_x = round(curr_x + 0.1, 1)
+    curr_row += 1
+
+chart_dz2 = ScatterChart()
+# Профессиональный заголовок с дробью через слэш
+chart_dz2.title = "y = sin(10x) / sin(x)"
+chart_dz2.legend = None # Отключаем легенду
+
+series_dz2 = Series(Reference(ws_dz2, min_col=2, min_row=2, max_row=curr_row-1), 
+                    Reference(ws_dz2, min_col=1, min_row=2, max_row=curr_row-1))
+series_dz2.smooth = True 
+series_dz2.graphicalProperties.line.solidFill = "0000FF" # Синий цвет
+series_dz2.graphicalProperties.line.width = 20000
+
+chart_dz2.series.append(series_dz2)
+ws_dz2.add_chart(chart_dz2, "D2")
+
+# ==========================================
 # ФИНАЛЬНОЕ СОХРАНЕНИЕ
 # ==========================================
-filename = 'Практическая работа 4 (Полная).xlsx'
+filename = 'Практическая_работа_4_с_ДЗ.xlsx'
 wb.save(filename)
-print(f'Магия вне Хогвартса! Файл "{filename}" собран. Все задания с 1 по 10 готовы!')
+print(f'Бро, все готово! Файл "{filename}" создан. Все задания и домашка внутри!')
