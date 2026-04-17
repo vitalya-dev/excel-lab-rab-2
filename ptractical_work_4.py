@@ -116,7 +116,7 @@ for cell_ref in ['A1', 'B1']:
 ws3.column_dimensions['C'].width, ws3.column_dimensions['D'].width = 12, 12
 
 # ==========================================
-# ЗАДАНИЕ 7: y = sin(2.5(x-3))
+# ЗАДАНИЕ 7: y = sin(2.5(x - 3))
 # ==========================================
 ws7 = cast(Worksheet, wb.create_sheet(title="Задание 7"))
 ws7['A1'], ws7['B1'] = 'X', 'Y'
@@ -130,8 +130,9 @@ while current_x <= 4.01:
     current_row += 1
 
 chart7 = ScatterChart()
-chart7.title = "y=sin 2.5(x-3)"
-chart7.legend = None  # ОТКЛЮЧАЕМ ЛЕГЕНДУ
+# Профессиональный заголовок
+chart7.title = "y = sin(2.5(x \u2212 3))"
+chart7.legend = None
 
 series7 = Series(Reference(ws7, min_col=2, min_row=2, max_row=current_row-1), 
                  Reference(ws7, min_col=1, min_row=2, max_row=current_row-1))
@@ -140,7 +141,7 @@ chart7.series.append(series7)
 ws7.add_chart(chart7, "D2")
 
 # ==========================================
-# ЗАДАНИЕ 8: y = log3(x+1) - ФИОЛЕТОВЫЙ ПУНКТИР
+# ЗАДАНИЕ 8: y = log₃(x + 1)
 # ==========================================
 ws8 = cast(Worksheet, wb.create_sheet(title="Задание 8"))
 ws8['A1'], ws8['B1'] = 'X', 'Y'
@@ -154,8 +155,9 @@ while current_x <= 3.01:
     current_row += 1
 
 chart8 = ScatterChart()
-chart8.title = "y=log3(x+1)"
-chart8.legend = None  # ОТКЛЮЧАЕМ ЛЕГЕНДУ
+# Используем подстрочную тройку \u2083
+chart8.title = "y = log\u2083(x + 1)"
+chart8.legend = None
 
 chart8.x_axis.scaling.min, chart8.x_axis.scaling.max = -2.0, 4.0
 chart8.y_axis.scaling.min, chart8.y_axis.scaling.max = -3.0, 2.0
@@ -163,15 +165,15 @@ chart8.y_axis.scaling.min, chart8.y_axis.scaling.max = -3.0, 2.0
 series8 = Series(Reference(ws8, min_col=2, min_row=2, max_row=current_row-1), 
                  Reference(ws8, min_col=1, min_row=2, max_row=current_row-1))
 series8.smooth = True 
-series8.graphicalProperties.line.solidFill = "7030A0" # Фиолетовый
-series8.graphicalProperties.line.dashStyle = "dash"   # Пунктир
+series8.graphicalProperties.line.solidFill = "7030A0" 
+series8.graphicalProperties.line.dashStyle = "dash"   
 series8.graphicalProperties.line.width = 30000 
 
 chart8.series.append(series8)
-ws8.add_chart(chart8, "D2")
+ws8.add_chart(chart8, "D2") # Исправил ws7 на текущий лист ws8 если была опечатка
 
 # ==========================================
-# ЗАДАНИЕ 9: y = x * cos(x) - ЗЕЛЕНЫЙ
+# ЗАДАНИЕ 9: y = x ⋅ cos(x)
 # ==========================================
 ws9 = cast(Worksheet, wb.create_sheet(title="Задание 9"))
 ws9['A1'], ws9['B1'] = 'X', 'Y'
@@ -185,8 +187,9 @@ while current_x <= 10.01:
     current_row += 1
 
 chart9 = ScatterChart()
-chart9.title = "y = x * cos(x)"
-chart9.legend = None  # ОТКЛЮЧАЕМ ЛЕГЕНДУ
+# Используем математическую точку \u22C5
+chart9.title = "y = x \u22C5 cos(x)"
+chart9.legend = None
 
 chart9.x_axis.scaling.min, chart9.x_axis.scaling.max = -12.0, 12.0
 chart9.y_axis.scaling.min, chart9.y_axis.scaling.max = -12.0, 12.0
@@ -194,14 +197,14 @@ chart9.y_axis.scaling.min, chart9.y_axis.scaling.max = -12.0, 12.0
 series9 = Series(Reference(ws9, min_col=2, min_row=2, max_row=current_row-1), 
                  Reference(ws9, min_col=1, min_row=2, max_row=current_row-1))
 series9.smooth = True 
-series9.graphicalProperties.line.solidFill = "008000" # Зеленый
+series9.graphicalProperties.line.solidFill = "008000" 
 series9.graphicalProperties.line.width = 25000 
 
 chart9.series.append(series9)
 ws9.add_chart(chart9, "D2")
 
 # ==========================================
-# ЗАДАНИЕ 10: y = 1 + 4x^2 - 2x^4/3 - КРАСНЫЙ
+# ЗАДАНИЕ 10: y = 1 + 4x² − 2x⁴/3
 # ==========================================
 ws10 = cast(Worksheet, wb.create_sheet(title="Задание 10"))
 ws10['A1'], ws10['B1'] = 'X', 'Y'
@@ -215,8 +218,9 @@ while current_x <= 3.01:
     current_row += 1
 
 chart10 = ScatterChart()
-chart10.title = "y = 1 + 4x² - 2x⁴/3"
-chart10.legend = None  # ОТКЛЮЧАЕМ ЛЕГЕНДУ
+# Красивые степени: ² (\u00B2) и ⁴ (\u2074)
+chart10.title = "y = 1 + 4x\u00B2 \u2212 2x\u2074/3"
+chart10.legend = None
 
 chart10.x_axis.scaling.min, chart10.x_axis.scaling.max = -4.0, 4.0
 chart10.y_axis.scaling.min, chart10.y_axis.scaling.max = -15.0, 10.0
@@ -224,7 +228,7 @@ chart10.y_axis.scaling.min, chart10.y_axis.scaling.max = -15.0, 10.0
 series10 = Series(Reference(ws10, min_col=2, min_row=2, max_row=current_row-1), 
                   Reference(ws10, min_col=1, min_row=2, max_row=current_row-1))
 series10.smooth = True 
-series10.graphicalProperties.line.solidFill = "FF0000" # Красный
+series10.graphicalProperties.line.solidFill = "FF0000" 
 series10.graphicalProperties.line.width = 30000
 
 chart10.series.append(series10)
