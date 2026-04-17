@@ -140,6 +140,10 @@ ws7.add_chart(chart7, "D2")
 # ==========================================
 # ЗАДАНИЕ 8: y = log3(x+1) на [-0.8; 3], шаг 0.2
 # ==========================================
+# ДОПОЛНИТЕЛЬНЫЕ ИМПОРТЫ ДЛЯ КРАСОТЫ (Добавь их наверх файла, если их там нет)
+from openpyxl.chart.shapes import GraphicalProperties
+from openpyxl.drawing.line import LineProperties
+
 ws8 = cast(Worksheet, wb.create_sheet(title="Задание 8"))
 ws8['A1'], ws8['B1'] = 'X', 'Y'
 ws8['A1'].font = ws8['B1'].font = Font(bold=True)
@@ -147,16 +151,34 @@ ws8['A1'].font = ws8['B1'].font = Font(bold=True)
 current_x, current_row = -0.8, 2
 while current_x <= 3.01:
     ws8.cell(row=current_row, column=1, value=current_x).number_format = '0.00'
-    # Формула логарифма по основанию 3
     ws8.cell(row=current_row, column=2, value=f'=LOG(A{current_row}+1, 3)').number_format = '0.00'
     current_x = round(current_x + 0.2, 2)
     current_row += 1
 
 chart8 = ScatterChart()
-chart8.title, chart8.style = "y=log3(x+1)", 2
+chart8.title = "y=log3(x+1)"
+chart8.style = 2  # Базовый стиль
+
+# --- НАСТРОЙКА ОСЕЙ КАК НА КАРТИНКЕ ---
+chart8.x_axis.scaling.min = -2.0
+chart8.x_axis.scaling.max = 4.0
+chart8.y_axis.scaling.min = -3.0
+chart8.y_axis.scaling.max = 2.0
+chart8.y_axis.majorUnit = 1.0 # Деления по Y через единицу
+
+# Создаем ряд данных (линию)
 series8 = Series(Reference(ws8, min_col=2, min_row=2, max_row=current_row-1), 
                  Reference(ws8, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
 series8.smooth = True 
+
+# --- МАГИЯ ОФОРМЛЕНИЯ ЛИНИИ ---
+# Задаем фиолетовый цвет (hex-код 7030A0)
+series8.graphicalProperties.line.solidFill = "7030A0"
+# Делаем линию пунктирной
+series8.graphicalProperties.line.dashStyle = "dash"
+# Делаем линию толще (измеряется во внутренних единицах EMU)
+series8.graphicalProperties.line.width = 30000 
+
 chart8.series.append(series8)
 ws8.add_chart(chart8, "D2")
 
