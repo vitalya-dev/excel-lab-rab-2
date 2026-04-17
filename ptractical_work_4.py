@@ -1,11 +1,7 @@
 import openpyxl
 from openpyxl.styles import Alignment, Font, PatternFill
-
-# Импорты для диаграмм (ДОБАВИЛ ScatterChart и Series)
 from openpyxl.chart import BarChart, PieChart3D, ScatterChart, Reference, Series
 from openpyxl.chart.label import DataLabelList
-
-# Типизация для Pyright
 from typing import cast
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.cell.cell import Cell
@@ -55,7 +51,6 @@ chart1.add_data(data_ref1, titles_from_data=True, from_rows=True)
 chart1.set_categories(cats_ref1)
 ws1.add_chart(chart1, "A6")
 
-
 # ==========================================
 # ЗАДАНИЕ 2: ОБЪЕМНАЯ КРУГОВАЯ ДИАГРАММА
 # ==========================================
@@ -88,23 +83,15 @@ pie.dataLabels = DataLabelList()
 pie.dataLabels.showPercent = True
 ws2.add_chart(pie, "A4")
 
-
 # ==========================================
 # ЗАДАНИЯ 3, 4, 5, 6: МАТЕМАТИЧЕСКИЕ ФОРМУЛЫ
 # ==========================================
 ws3 = cast(Worksheet, wb.create_sheet(title="Формулы (4-6)"))
 
-ws3['A1'] = 'X'
-ws3['B1'] = 'Y'
-ws3['A2'] = 4  
-ws3['B2'] = 3  
+ws3['A1'], ws3['B1'] = 'X', 'Y'
+ws3['A2'], ws3['B2'] = 4, 3  
 
-tasks = [
-    ('C1', 'Задание 3'),
-    ('C2', 'Задание 4'),
-    ('C3', 'Задание 5'),
-    ('C4', 'Задание 6')
-]
+tasks = [('C1', 'Задание 3'), ('C2', 'Задание 4'), ('C3', 'Задание 5'), ('C4', 'Задание 6')]
 
 for cell_ref, label in tasks:
     c = cast(Cell, ws3[cell_ref])
@@ -119,7 +106,6 @@ ws3['D4'] = '=SIN((A2+5)/(3*A2-2))+SQRT(A2^3+1)'
 for row_idx in range(1, 5):
     res_cell = cast(Cell, ws3.cell(row=row_idx, column=4))
     res_cell.number_format = '0.000'
-    res_cell.alignment = Alignment(horizontal='left')
 
 for cell_ref in ['A1', 'B1']:
     c = cast(Cell, ws3[cell_ref])
@@ -127,75 +113,102 @@ for cell_ref in ['A1', 'B1']:
     c.alignment = Alignment(horizontal='center')
     c.fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
 
-ws3.column_dimensions['C'].width = 12
-ws3.column_dimensions['D'].width = 12
-
+ws3.column_dimensions['C'].width, ws3.column_dimensions['D'].width = 12, 12
 
 # ==========================================
-# ЗАДАНИЕ 7: ПОСТРОЕНИЕ ГРАФИКА ФУНКЦИИ
+# ЗАДАНИЕ 7: y = sin(2.5(x-3))
 # ==========================================
 ws7 = cast(Worksheet, wb.create_sheet(title="Задание 7"))
+ws7['A1'], ws7['B1'] = 'X', 'Y'
+ws7['A1'].font = ws7['B1'].font = Font(bold=True)
 
-# Шапка таблицы
-ws7['A1'] = 'X'
-ws7['B1'] = 'Y'
-
-for c_ref in ['A1', 'B1']:
-    c = cast(Cell, ws7[c_ref])
-    c.font = Font(bold=True)
-    c.alignment = Alignment(horizontal='center')
-
-# Заполняем таблицу с помощью цикла while (от -4 до 4 с шагом 0.2)
-current_x = -4.0
-current_row = 2
-
-# Используем 4.01, чтобы избежать багов с дробными числами (когда 4.0 превращается в 4.00000001)
+current_x, current_row = -4.0, 2
 while current_x <= 4.01:
-    # Записываем значение X
-    cell_x = cast(Cell, ws7.cell(row=current_row, column=1))
-    cell_x.value = current_x
-    cell_x.number_format = '0.00' # 2 знака после запятой
-    
-    # Записываем Excel-формулу для Y. Важно: используем точку (2.5), так как это стандартный формат формул
-    cell_y = cast(Cell, ws7.cell(row=current_row, column=2))
-    cell_y.value = f'=SIN(2.5*(A{current_row}-3))'
-    cell_y.number_format = '0.00'
-    
-    current_x += 0.2
+    ws7.cell(row=current_row, column=1, value=current_x).number_format = '0.00'
+    ws7.cell(row=current_row, column=2, value=f'=SIN(2.5*(A{current_row}-3))').number_format = '0.00'
+    current_x = round(current_x + 0.2, 2)
     current_row += 1
 
-# Строим точечную диаграмму
 chart7 = ScatterChart()
-chart7.title = "y=sin 2.5(x-3)"
-chart7.style = 2
-
-# Настраиваем жесткие границы осей как в PDF
-chart7.x_axis.scaling.min = -5.0
-chart7.x_axis.scaling.max = 5.0
-chart7.y_axis.scaling.min = -2.0
-chart7.y_axis.scaling.max = 2.0
-chart7.y_axis.majorUnit = 1.0 # Основные деления оси Y через 1.0
-
-# Передаем данные в график
-x_values = Reference(ws7, min_col=1, min_row=2, max_row=current_row-1)
-y_values = Reference(ws7, min_col=2, min_row=2, max_row=current_row-1)
-
-# Создаем ряд данных (график)
-series7 = Series(y_values, x_values, title_from_data=False)
-
-# УДАЛИЛИ ПРОБЛЕМНУЮ СТРОЧКУ ЗДЕСЬ
-
-# МАГИЯ: Делаем кривую гладкой
+chart7.title, chart7.style = "y=sin 2.5(x-3)", 2
+series7 = Series(Reference(ws7, min_col=2, min_row=2, max_row=current_row-1), 
+                 Reference(ws7, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
 series7.smooth = True 
-
 chart7.series.append(series7)
-
-# Размещаем график рядышком с таблицей (в колонке D)
 ws7.add_chart(chart7, "D2")
+
+# ==========================================
+# ЗАДАНИЕ 8: y = log3(x+1) на [-0.8; 3], шаг 0.2
+# ==========================================
+ws8 = cast(Worksheet, wb.create_sheet(title="Задание 8"))
+ws8['A1'], ws8['B1'] = 'X', 'Y'
+ws8['A1'].font = ws8['B1'].font = Font(bold=True)
+
+current_x, current_row = -0.8, 2
+while current_x <= 3.01:
+    ws8.cell(row=current_row, column=1, value=current_x).number_format = '0.00'
+    # Формула логарифма по основанию 3
+    ws8.cell(row=current_row, column=2, value=f'=LOG(A{current_row}+1, 3)').number_format = '0.00'
+    current_x = round(current_x + 0.2, 2)
+    current_row += 1
+
+chart8 = ScatterChart()
+chart8.title, chart8.style = "y=log3(x+1)", 2
+series8 = Series(Reference(ws8, min_col=2, min_row=2, max_row=current_row-1), 
+                 Reference(ws8, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
+series8.smooth = True 
+chart8.series.append(series8)
+ws8.add_chart(chart8, "D2")
+
+# ==========================================
+# ЗАДАНИЕ 9: y = x * cos(x) на [-10; 10], шаг 0.1
+# ==========================================
+ws9 = cast(Worksheet, wb.create_sheet(title="Задание 9"))
+ws9['A1'], ws9['B1'] = 'X', 'Y'
+ws9['A1'].font = ws9['B1'].font = Font(bold=True)
+
+current_x, current_row = -10.0, 2
+while current_x <= 10.01:
+    ws9.cell(row=current_row, column=1, value=current_x).number_format = '0.00'
+    # Умножаем X на косинус X
+    ws9.cell(row=current_row, column=2, value=f'=A{current_row}*COS(A{current_row})').number_format = '0.00'
+    current_x = round(current_x + 0.1, 2) # Обрати внимание: шаг 0.1
+    current_row += 1
+
+chart9 = ScatterChart()
+chart9.title, chart9.style = "y=x*cos(x)", 2
+series9 = Series(Reference(ws9, min_col=2, min_row=2, max_row=current_row-1), 
+                 Reference(ws9, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
+series9.smooth = True 
+chart9.series.append(series9)
+ws9.add_chart(chart9, "D2")
+
+# ==========================================
+# ЗАДАНИЕ 10: y = 1 + 4x^2 - (2x^4)/3 на [-3; 3], шаг 0.2
+# ==========================================
+ws10 = cast(Worksheet, wb.create_sheet(title="Задание 10"))
+ws10['A1'], ws10['B1'] = 'X', 'Y'
+ws10['A1'].font = ws10['B1'].font = Font(bold=True)
+
+current_x, current_row = -3.0, 2
+while current_x <= 3.01:
+    ws10.cell(row=current_row, column=1, value=current_x).number_format = '0.00'
+    # Записываем длинную формулу
+    ws10.cell(row=current_row, column=2, value=f'=1+4*A{current_row}^2-2*A{current_row}^4/3').number_format = '0.00'
+    current_x = round(current_x + 0.2, 2)
+    current_row += 1
+
+chart10 = ScatterChart()
+chart10.title, chart10.style = "y=1+4x^2-2x^4/3", 2
+series10 = Series(Reference(ws10, min_col=2, min_row=2, max_row=current_row-1), 
+                  Reference(ws10, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
+series10.smooth = True 
+chart10.series.append(series10)
+ws10.add_chart(chart10, "D2")
 
 # ==========================================
 # ФИНАЛЬНОЕ СОХРАНЕНИЕ
 # ==========================================
 filename = 'Практическая работа 4 (Полная).xlsx'
 wb.save(filename)
-print(f'Отлично, бро! Файл "{filename}" обновлен. График функции построен!')
+print(f'Магия вне Хогвартса! Файл "{filename}" собран. Все задания с 1 по 10 готовы!')
