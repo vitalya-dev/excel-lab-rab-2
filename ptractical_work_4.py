@@ -267,15 +267,23 @@ ws_dz1.column_dimensions['B'].width = 20
 # Строим круговую диаграмму
 ocean_chart = PieChart()
 ocean_chart.title = "Соотношение площадей океанов"
-# Включаем проценты
-ocean_chart.dataLabels = DataLabelList()
-ocean_chart.dataLabels.showPercent = True
 
+# --- НАСТРОЙКА ИДЕАЛЬНЫХ ПОДПИСЕЙ ---
+ocean_chart.dataLabels = DataLabelList()
+ocean_chart.dataLabels.showVal = False       # ОТКЛЮЧАЕМ точные значения (165.2 и т.д.)
+ocean_chart.dataLabels.showSerName = False   # ОТКЛЮЧАЕМ дурацкую надпись "Столбец В"
+ocean_chart.dataLabels.showCatName = True    # ВКЛЮЧАЕМ названия океанов
+ocean_chart.dataLabels.showPercent = True    # ВКЛЮЧАЕМ проценты
+ocean_chart.dataLabels.separator = "\n"      # Ставим перенос строки между названием и процентом для красоты
+# ------------------------------------
+
+# Данные и категории
 data_ref = Reference(ws_dz1, min_col=2, min_row=2, max_row=6)
 cats_ref = Reference(ws_dz1, min_col=1, min_row=2, max_row=6)
 ocean_chart.add_data(data_ref)
 ocean_chart.set_categories(cats_ref)
 
+# Размещаем график
 ws_dz1.add_chart(ocean_chart, "D2")
 
 # ==========================================
