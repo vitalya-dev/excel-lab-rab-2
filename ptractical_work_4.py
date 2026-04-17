@@ -1,6 +1,8 @@
 import openpyxl
 from openpyxl.styles import Alignment, Font, PatternFill
-from openpyxl.chart import BarChart, PieChart3D, Reference
+
+# Импорты для диаграмм (ДОБАВИЛ ScatterChart и Series)
+from openpyxl.chart import BarChart, PieChart3D, ScatterChart, Reference, Series
 from openpyxl.chart.label import DataLabelList
 
 # Типизация для Pyright
@@ -17,14 +19,12 @@ wb = openpyxl.Workbook()
 ws1 = cast(Worksheet, wb.active)
 ws1.title = "Задание 1"
 
-# Заголовок
 cell_a1 = cast(Cell, ws1['A1'])
 cell_a1.value = 'Показатели производства за 2014 год'
 ws1.merge_cells('A1:E1')
 cell_a1.font = Font(bold=True)
 cell_a1.alignment = Alignment(horizontal='center', vertical='center')
 
-# Шапка кварталов
 headers_ws1 = ['1', '2', '3', '4']
 for col_idx, text in enumerate(headers_ws1, start=2):
     c = cast(Cell, ws1.cell(row=2, column=col_idx))
@@ -32,7 +32,6 @@ for col_idx, text in enumerate(headers_ws1, start=2):
     c.font = Font(bold=True)
     c.alignment = Alignment(horizontal='center')
 
-# Данные
 data_ws1 = [
     ['План (тыс. руб)', 1000, 800, 1500, 1100],
     ['Факт (тыс. руб)', 980, 1150, 1200, 1060]
@@ -47,7 +46,6 @@ for i, row_data in enumerate(data_ws1, start=3):
 
 ws1.column_dimensions['A'].width = 18
 
-# Построение гистограммы
 chart1 = BarChart()
 chart1.type = "col"
 chart1.title = "Поквартальное выполнение плана"
@@ -63,12 +61,12 @@ ws1.add_chart(chart1, "A6")
 # ==========================================
 ws2 = cast(Worksheet, wb.create_sheet(title="Задание 2"))
 
-# Шапка и данные
 headers_ws2 = ['1 квартал', '2 квартал', '3 квартал', '4 квартал']
 for col_idx, text in enumerate(headers_ws2, start=2):
     c = cast(Cell, ws2.cell(row=1, column=col_idx))
     c.value = text
     c.font = Font(bold=True)
+    c.alignment = Alignment(horizontal='center')
 
 data_ws2 = ['Факт (тыс.руб.)', 980, 1150, 1200, 1060]
 for col_idx, val in enumerate(data_ws2, start=1):
@@ -77,8 +75,9 @@ for col_idx, val in enumerate(data_ws2, start=1):
     if col_idx == 1: c.font = Font(bold=True)
 
 ws2.column_dimensions['A'].width = 18
+for col in ['B', 'C', 'D', 'E']:
+    ws2.column_dimensions[col].width = 12
 
-# Построение 3D круговой диаграммы
 pie = PieChart3D()
 pie.title = "Фактическое выполнение плана"
 data_ref2 = Reference(ws2, min_col=2, min_row=2, max_col=5, max_row=2)
@@ -91,17 +90,15 @@ ws2.add_chart(pie, "A4")
 
 
 # ==========================================
-# ЗАДАНИЯ 3, 4, 5: МАТЕМАТИЧЕСКИЕ ФОРМУЛЫ
+# ЗАДАНИЯ 3, 4, 5, 6: МАТЕМАТИЧЕСКИЕ ФОРМУЛЫ
 # ==========================================
 ws3 = cast(Worksheet, wb.create_sheet(title="Формулы (4-6)"))
 
-# 1. Создаем структуру таблицы 
 ws3['A1'] = 'X'
 ws3['B1'] = 'Y'
-ws3['A2'] = 4  # Значение x из примера [cite: 158, 166]
-ws3['B2'] = 3  # Значение y из примера [cite: 158, 166]
+ws3['A2'] = 4  
+ws3['B2'] = 3  
 
-# Подписи для заданий в колонке C
 tasks = [
     ('C1', 'Задание 3'),
     ('C2', 'Задание 4'),
@@ -114,26 +111,16 @@ for cell_ref, label in tasks:
     c.value = label
     c.font = Font(bold=True)
 
-# 2. Прописываем формулы в колонку D
-# Задание 3: (1+x)/(4y) 
 ws3['D1'] = '=(1+A2)/(4*B2)'
-
-# Задание 4: -2x + (x^5)/(3y^2+4) 
 ws3['D2'] = '=-2*A2+(A2^5)/(3*B2^2+4)'
-
-# Задание 5: КОРЕНЬ(7x+2) [cite: 177, 179]
 ws3['D3'] = '=SQRT(7*A2+2)'
-
-# Задание 6: sin((x+5)/(3x-2)) + КОРЕНЬ(x^3+1) [cite: 201]
 ws3['D4'] = '=SIN((A2+5)/(3*A2-2))+SQRT(A2^3+1)'
 
-# 3. Настраиваем формат: 3 знака после запятой для результатов 
 for row_idx in range(1, 5):
     res_cell = cast(Cell, ws3.cell(row=row_idx, column=4))
     res_cell.number_format = '0.000'
     res_cell.alignment = Alignment(horizontal='left')
 
-# Красивое оформление шапки X и Y
 for cell_ref in ['A1', 'B1']:
     c = cast(Cell, ws3[cell_ref])
     c.font = Font(bold=True)
@@ -143,7 +130,72 @@ for cell_ref in ['A1', 'B1']:
 ws3.column_dimensions['C'].width = 12
 ws3.column_dimensions['D'].width = 12
 
-# Сохранение
+
+# ==========================================
+# ЗАДАНИЕ 7: ПОСТРОЕНИЕ ГРАФИКА ФУНКЦИИ
+# ==========================================
+ws7 = cast(Worksheet, wb.create_sheet(title="Задание 7"))
+
+# Шапка таблицы
+ws7['A1'] = 'X'
+ws7['B1'] = 'Y'
+
+for c_ref in ['A1', 'B1']:
+    c = cast(Cell, ws7[c_ref])
+    c.font = Font(bold=True)
+    c.alignment = Alignment(horizontal='center')
+
+# Заполняем таблицу с помощью цикла while (от -4 до 4 с шагом 0.2)
+current_x = -4.0
+current_row = 2
+
+# Используем 4.01, чтобы избежать багов с дробными числами (когда 4.0 превращается в 4.00000001)
+while current_x <= 4.01:
+    # Записываем значение X
+    cell_x = cast(Cell, ws7.cell(row=current_row, column=1))
+    cell_x.value = current_x
+    cell_x.number_format = '0.00' # 2 знака после запятой
+    
+    # Записываем Excel-формулу для Y. Важно: используем точку (2.5), так как это стандартный формат формул
+    cell_y = cast(Cell, ws7.cell(row=current_row, column=2))
+    cell_y.value = f'=SIN(2.5*(A{current_row}-3))'
+    cell_y.number_format = '0.00'
+    
+    current_x += 0.2
+    current_row += 1
+
+# Строим точечную диаграмму
+chart7 = ScatterChart()
+chart7.title = "y=sin 2.5(x-3)"
+chart7.style = 2
+
+# Настраиваем жесткие границы осей как в PDF
+chart7.x_axis.scaling.min = -5.0
+chart7.x_axis.scaling.max = 5.0
+chart7.y_axis.scaling.min = -2.0
+chart7.y_axis.scaling.max = 2.0
+chart7.y_axis.majorUnit = 1.0 # Основные деления оси Y через 1.0
+
+# Передаем данные в график
+x_values = Reference(ws7, min_col=1, min_row=2, max_row=current_row-1)
+y_values = Reference(ws7, min_col=2, min_row=2, max_row=current_row-1)
+
+# Создаем ряд данных (график)
+series7 = Series(y_values, x_values, title_from_data=False)
+
+# УДАЛИЛИ ПРОБЛЕМНУЮ СТРОЧКУ ЗДЕСЬ
+
+# МАГИЯ: Делаем кривую гладкой
+series7.smooth = True 
+
+chart7.series.append(series7)
+
+# Размещаем график рядышком с таблицей (в колонке D)
+ws7.add_chart(chart7, "D2")
+
+# ==========================================
+# ФИНАЛЬНОЕ СОХРАНЕНИЕ
+# ==========================================
 filename = 'Практическая работа 4 (Полная).xlsx'
 wb.save(filename)
-print(f'Бро, готово! Собрал всё в файл "{filename}". Все диаграммы и формулы на месте!')
+print(f'Отлично, бро! Файл "{filename}" обновлен. График функции построен!')
