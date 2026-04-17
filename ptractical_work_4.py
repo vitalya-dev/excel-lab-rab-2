@@ -192,21 +192,33 @@ ws9['A1'].font = ws9['B1'].font = Font(bold=True)
 current_x, current_row = -10.0, 2
 while current_x <= 10.01:
     ws9.cell(row=current_row, column=1, value=current_x).number_format = '0.00'
-    # Умножаем X на косинус X
     ws9.cell(row=current_row, column=2, value=f'=A{current_row}*COS(A{current_row})').number_format = '0.00'
-    current_x = round(current_x + 0.1, 2) # Обрати внимание: шаг 0.1
+    current_x = round(current_x + 0.1, 2)
     current_row += 1
 
 chart9 = ScatterChart()
-chart9.title, chart9.style = "y=x*cos(x)", 2
+chart9.title = "y = x * cos(x)"
+chart9.style = 2
+
+# Настройка осей для широкого обзора
+chart9.x_axis.scaling.min = -12.0
+chart9.x_axis.scaling.max = 12.0
+chart9.y_axis.scaling.min = -12.0
+chart9.y_axis.scaling.max = 12.0
+
 series9 = Series(Reference(ws9, min_col=2, min_row=2, max_row=current_row-1), 
                  Reference(ws9, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
 series9.smooth = True 
+
+# Оформление: Темно-зеленая сплошная линия
+series9.graphicalProperties.line.solidFill = "008000" 
+series9.graphicalProperties.line.width = 25000 
+
 chart9.series.append(series9)
 ws9.add_chart(chart9, "D2")
 
 # ==========================================
-# ЗАДАНИЕ 10: y = 1 + 4x^2 - (2x^4)/3 на [-3; 3], шаг 0.2
+# ЗАДАНИЕ 10: y = 1 + 4x^2 - 2x^4/3 на [-3; 3], шаг 0.2
 # ==========================================
 ws10 = cast(Worksheet, wb.create_sheet(title="Задание 10"))
 ws10['A1'], ws10['B1'] = 'X', 'Y'
@@ -215,16 +227,28 @@ ws10['A1'].font = ws10['B1'].font = Font(bold=True)
 current_x, current_row = -3.0, 2
 while current_x <= 3.01:
     ws10.cell(row=current_row, column=1, value=current_x).number_format = '0.00'
-    # Записываем длинную формулу
     ws10.cell(row=current_row, column=2, value=f'=1+4*A{current_row}^2-2*A{current_row}^4/3').number_format = '0.00'
     current_x = round(current_x + 0.2, 2)
     current_row += 1
 
 chart10 = ScatterChart()
-chart10.title, chart10.style = "y=1+4x^2-2x^4/3", 2
+chart10.title = "y = 1 + 4x² - 2x⁴/3"
+chart10.style = 2
+
+# Настройка осей для четкого отображения пиков
+chart10.x_axis.scaling.min = -4.0
+chart10.x_axis.scaling.max = 4.0
+chart10.y_axis.scaling.min = -15.0
+chart10.y_axis.scaling.max = 10.0
+
 series10 = Series(Reference(ws10, min_col=2, min_row=2, max_row=current_row-1), 
                   Reference(ws10, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
 series10.smooth = True 
+
+# Оформление: Ярко-красная линия
+series10.graphicalProperties.line.solidFill = "FF0000"
+series10.graphicalProperties.line.width = 30000
+
 chart10.series.append(series10)
 ws10.add_chart(chart10, "D2")
 
