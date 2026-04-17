@@ -130,20 +130,18 @@ while current_x <= 4.01:
     current_row += 1
 
 chart7 = ScatterChart()
-chart7.title, chart7.style = "y=sin 2.5(x-3)", 2
+chart7.title = "y=sin 2.5(x-3)"
+chart7.legend = None  # ОТКЛЮЧАЕМ ЛЕГЕНДУ
+
 series7 = Series(Reference(ws7, min_col=2, min_row=2, max_row=current_row-1), 
-                 Reference(ws7, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
+                 Reference(ws7, min_col=1, min_row=2, max_row=current_row-1))
 series7.smooth = True 
 chart7.series.append(series7)
 ws7.add_chart(chart7, "D2")
 
 # ==========================================
-# ЗАДАНИЕ 8: y = log3(x+1) на [-0.8; 3], шаг 0.2
+# ЗАДАНИЕ 8: y = log3(x+1) - ФИОЛЕТОВЫЙ ПУНКТИР
 # ==========================================
-# ДОПОЛНИТЕЛЬНЫЕ ИМПОРТЫ ДЛЯ КРАСОТЫ (Добавь их наверх файла, если их там нет)
-from openpyxl.chart.shapes import GraphicalProperties
-from openpyxl.drawing.line import LineProperties
-
 ws8 = cast(Worksheet, wb.create_sheet(title="Задание 8"))
 ws8['A1'], ws8['B1'] = 'X', 'Y'
 ws8['A1'].font = ws8['B1'].font = Font(bold=True)
@@ -157,33 +155,23 @@ while current_x <= 3.01:
 
 chart8 = ScatterChart()
 chart8.title = "y=log3(x+1)"
-chart8.style = 2  # Базовый стиль
+chart8.legend = None  # ОТКЛЮЧАЕМ ЛЕГЕНДУ
 
-# --- НАСТРОЙКА ОСЕЙ КАК НА КАРТИНКЕ ---
-chart8.x_axis.scaling.min = -2.0
-chart8.x_axis.scaling.max = 4.0
-chart8.y_axis.scaling.min = -3.0
-chart8.y_axis.scaling.max = 2.0
-chart8.y_axis.majorUnit = 1.0 # Деления по Y через единицу
+chart8.x_axis.scaling.min, chart8.x_axis.scaling.max = -2.0, 4.0
+chart8.y_axis.scaling.min, chart8.y_axis.scaling.max = -3.0, 2.0
 
-# Создаем ряд данных (линию)
 series8 = Series(Reference(ws8, min_col=2, min_row=2, max_row=current_row-1), 
-                 Reference(ws8, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
+                 Reference(ws8, min_col=1, min_row=2, max_row=current_row-1))
 series8.smooth = True 
-
-# --- МАГИЯ ОФОРМЛЕНИЯ ЛИНИИ ---
-# Задаем фиолетовый цвет (hex-код 7030A0)
-series8.graphicalProperties.line.solidFill = "7030A0"
-# Делаем линию пунктирной
-series8.graphicalProperties.line.dashStyle = "dash"
-# Делаем линию толще (измеряется во внутренних единицах EMU)
+series8.graphicalProperties.line.solidFill = "7030A0" # Фиолетовый
+series8.graphicalProperties.line.dashStyle = "dash"   # Пунктир
 series8.graphicalProperties.line.width = 30000 
 
 chart8.series.append(series8)
 ws8.add_chart(chart8, "D2")
 
 # ==========================================
-# ЗАДАНИЕ 9: y = x * cos(x) на [-10; 10], шаг 0.1
+# ЗАДАНИЕ 9: y = x * cos(x) - ЗЕЛЕНЫЙ
 # ==========================================
 ws9 = cast(Worksheet, wb.create_sheet(title="Задание 9"))
 ws9['A1'], ws9['B1'] = 'X', 'Y'
@@ -198,27 +186,22 @@ while current_x <= 10.01:
 
 chart9 = ScatterChart()
 chart9.title = "y = x * cos(x)"
-chart9.style = 2
+chart9.legend = None  # ОТКЛЮЧАЕМ ЛЕГЕНДУ
 
-# Настройка осей для широкого обзора
-chart9.x_axis.scaling.min = -12.0
-chart9.x_axis.scaling.max = 12.0
-chart9.y_axis.scaling.min = -12.0
-chart9.y_axis.scaling.max = 12.0
+chart9.x_axis.scaling.min, chart9.x_axis.scaling.max = -12.0, 12.0
+chart9.y_axis.scaling.min, chart9.y_axis.scaling.max = -12.0, 12.0
 
 series9 = Series(Reference(ws9, min_col=2, min_row=2, max_row=current_row-1), 
-                 Reference(ws9, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
+                 Reference(ws9, min_col=1, min_row=2, max_row=current_row-1))
 series9.smooth = True 
-
-# Оформление: Темно-зеленая сплошная линия
-series9.graphicalProperties.line.solidFill = "008000" 
+series9.graphicalProperties.line.solidFill = "008000" # Зеленый
 series9.graphicalProperties.line.width = 25000 
 
 chart9.series.append(series9)
 ws9.add_chart(chart9, "D2")
 
 # ==========================================
-# ЗАДАНИЕ 10: y = 1 + 4x^2 - 2x^4/3 на [-3; 3], шаг 0.2
+# ЗАДАНИЕ 10: y = 1 + 4x^2 - 2x^4/3 - КРАСНЫЙ
 # ==========================================
 ws10 = cast(Worksheet, wb.create_sheet(title="Задание 10"))
 ws10['A1'], ws10['B1'] = 'X', 'Y'
@@ -233,20 +216,15 @@ while current_x <= 3.01:
 
 chart10 = ScatterChart()
 chart10.title = "y = 1 + 4x² - 2x⁴/3"
-chart10.style = 2
+chart10.legend = None  # ОТКЛЮЧАЕМ ЛЕГЕНДУ
 
-# Настройка осей для четкого отображения пиков
-chart10.x_axis.scaling.min = -4.0
-chart10.x_axis.scaling.max = 4.0
-chart10.y_axis.scaling.min = -15.0
-chart10.y_axis.scaling.max = 10.0
+chart10.x_axis.scaling.min, chart10.x_axis.scaling.max = -4.0, 4.0
+chart10.y_axis.scaling.min, chart10.y_axis.scaling.max = -15.0, 10.0
 
 series10 = Series(Reference(ws10, min_col=2, min_row=2, max_row=current_row-1), 
-                  Reference(ws10, min_col=1, min_row=2, max_row=current_row-1), title_from_data=False)
+                  Reference(ws10, min_col=1, min_row=2, max_row=current_row-1))
 series10.smooth = True 
-
-# Оформление: Ярко-красная линия
-series10.graphicalProperties.line.solidFill = "FF0000"
+series10.graphicalProperties.line.solidFill = "FF0000" # Красный
 series10.graphicalProperties.line.width = 30000
 
 chart10.series.append(series10)
