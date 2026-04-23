@@ -221,6 +221,178 @@ else:
     print("Внимание: Лист '8' не найден!")
 # --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 8 ---
 
+# --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 9 ---
+if '9' in wb.sheetnames:
+    ws_9 = wb['9']
+    from openpyxl.styles import PatternFill, Font, Border, Side, Alignment
+    from openpyxl.formatting.rule import CellIsRule
+    
+    # 1. Настраиваем стили (сделаем светло-синюю шапку для разнообразия)
+    header_fill_9 = PatternFill(start_color="BDD7EE", end_color="BDD7EE", fill_type="solid")
+    bold_font = Font(bold=True)
+    center_align = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+
+    # 2. Оформляем шапку (1-я строка, столбцы A - D)
+    for col_idx in range(1, 5):
+        cell = ws_9.cell(row=1, column=col_idx)
+        cell.fill = header_fill_9
+        cell.font = bold_font
+        cell.alignment = center_align
+        cell.border = thin_border
+
+    # 3. Данные и формулы со 2-й строки
+    for row in range(2, ws_9.max_row + 1):
+        # Формула И (AND): Если Рост (B) > 180 И Возраст (C) > 18
+        ws_9[f'D{row}'].value = f'=IF(AND(B{row}>180, C{row}>18), "принят", "не принят")'
+        
+        # Рамки и выравнивание по центру для всех ячеек, кроме Фамилии
+        for col_idx in range(1, 5):
+            cell = ws_9.cell(row=row, column=col_idx)
+            cell.border = thin_border
+            if col_idx > 1: 
+                cell.alignment = center_align
+
+    # 4. Условное форматирование для наглядности (Зеленый/Красный)
+    green_fill = PatternFill(start_color='C6EFCE', end_color='C6EFCE', fill_type='solid')
+    red_fill = PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid')
+    ws_9.conditional_formatting.add('D2:D100', CellIsRule(operator='equal', formula=['"не принят"'], fill=red_fill))
+    ws_9.conditional_formatting.add('D2:D100', CellIsRule(operator='equal', formula=['"принят"'], fill=green_fill))
+    
+    print("Задание 9 (лист 9) готово: условия И (AND) и стили настроены.")
+else:
+    print("Внимание: Лист '9' не найден!")
+# --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 9 ---
+
+
+# --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 10 ---
+if '10' in wb.sheetnames:
+    ws_10 = wb['10']
+    
+    # 1. Настраиваем стили (сделаем светло-оранжевую шапку)
+    header_fill_10 = PatternFill(start_color="FCE4D6", end_color="FCE4D6", fill_type="solid")
+
+    # 2. Оформляем шапку (1-я строка, столбцы A - F)
+    for col_idx in range(1, 7):
+        cell = ws_10.cell(row=1, column=col_idx)
+        cell.fill = header_fill_10
+        cell.font = bold_font
+        cell.alignment = center_align
+        cell.border = thin_border
+
+    # 3. Данные и формулы со 2-й строки
+    for row in range(2, ws_10.max_row + 1):
+        # Формула Суммы (столбец E): складываем Математику (B), Русский (C) и Ин.яз (D)
+        ws_10[f'E{row}'].value = f'=SUM(B{row}:D{row})'
+        
+        # Формула ИЛИ (OR): Если Сумма (E) >= 180 ИЛИ Русский (C) > 80 ИЛИ Ин.яз (D) > 80
+        ws_10[f'F{row}'].value = f'=IF(OR(E{row}>=180, C{row}>80, D{row}>80), "зачислен", "не зачислен")'
+        
+        # Рамки и выравнивание
+        for col_idx in range(1, 7):
+            cell = ws_10.cell(row=row, column=col_idx)
+            cell.border = thin_border
+            if col_idx > 1:
+                cell.alignment = center_align
+
+    # 4. Условное форматирование для "зачислен" / "не зачислен"
+    ws_10.conditional_formatting.add('F2:F100', CellIsRule(operator='equal', formula=['"не зачислен"'], fill=red_fill))
+    ws_10.conditional_formatting.add('F2:F100', CellIsRule(operator='equal', formula=['"зачислен"'], fill=green_fill))
+
+    print("Задание 10 (лист 10) готово: условия ИЛИ (OR) и стили настроены.")
+else:
+    print("Внимание: Лист '10' не найден!")
+# --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 10 ---
+
+# --- НАЧАЛО КОДА ДЛЯ ДЗ 10 ЗАДАНИЕ 1 ---
+from openpyxl.styles import PatternFill, Font, Border, Side, Alignment
+from openpyxl.utils import get_column_letter
+
+# 1. Подготавливаем данные из PDF-методички
+dz1_data = [
+    ["Факс", "Персональный", 2604, 200],
+    ["Факс", "Персональный+", 3774, 120],
+    ["Факс", "Деловой", 2580, 160],
+    ["Факс", "Профессиональный+", 4440, 400],
+    ["Факс", "Профессиональный", 4500, 300],
+    ["Факс", "Деловой", 1350, 230],
+    ["Факс", "Профессиональный+", 6336, 190],
+    ["Факс", "Профессиональный", 4920, 320],
+    ["Факс", "Персональный", 2592, 543],
+    ["Ксерокс", "Профессиональный+", 6168, 190],
+    ["Ксерокс", "Профессиональный", 4944, 183],
+    ["Ксерокс", "Профессиональный", 5520, 500],
+    ["Ксерокс", "Персональный", 3780, 320],
+    ["Ксерокс", "Персональный", 3828, 170],
+    ["Ксерокс", "Персональный+", 6156, 400],
+    ["Ксерокс", "Персональный+", 6204, 350],
+    ["Ксерокс", "Деловой", 3792, 234],
+    ["Ксерокс", "Деловой", 3600, 432]
+]
+
+# Стили для красоты
+header_fill_dz = PatternFill(start_color="FFE699", end_color="FFE699", fill_type="solid") # Желтая шапка
+bold_font = Font(bold=True)
+center_align = Alignment(horizontal="center", vertical="center")
+thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), 
+                     top=Side(style='thin'), bottom=Side(style='thin'))
+
+# 2. Создаем 5 листов: базу и 4 листа для фильтров по заданию
+sheet_names = [
+    "ДЗ_10_1_Фильтр_1", # Ксероксы, Персональный
+    "ДЗ_10_1_Фильтр_2", # Топ-8 по сумме
+    "ДЗ_10_1_Фильтр_3", # Сумма < 1 000 000
+    "ДЗ_10_1_Фильтр_4"  # Профессиональный и Проф+
+]
+
+for sheet_name in sheet_names:
+    ws = wb.create_sheet(title=sheet_name)
+    
+    # Заполняем и красим шапку
+    headers = ["Товар", "Название", "Цена", "Кол-во", "Сумма"]
+    for col_idx, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_idx, value=h)
+        cell.fill = header_fill_dz
+        cell.font = bold_font
+        cell.alignment = center_align
+        cell.border = thin_border
+        # Раздвигаем колонки, чтобы текст влезал
+        ws.column_dimensions[get_column_letter(col_idx)].width = 20
+    
+    # Вставляем данные
+    for row_idx, row_data in enumerate(dz1_data, start=2):
+        for col_idx, val in enumerate(row_data, start=1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=val)
+            cell.border = thin_border
+            # Формат рублей для Цены
+            if col_idx == 3: 
+                cell.number_format = '#,##0 ₽'
+        
+        # Считаем Сумму (Цена * Кол-во)
+        sum_cell = ws.cell(row=row_idx, column=5)
+        sum_cell.value = f'=C{row_idx}*D{row_idx}'
+        sum_cell.number_format = '#,##0 ₽'
+        sum_cell.border = thin_border
+    
+    # Включаем стрелочки автофильтра на всю таблицу
+    ws.auto_filter.ref = ws.dimensions
+
+    # Твоя шпаргалка по фильтрам (когда откроешь готовый Excel-файл):
+
+    # Лист "ДЗ_10_1_Фильтр_1": Столбец А (Товар) -> выбери «Ксерокс». Столбец B (Название) -> выбери «Персональный».
+
+    # Лист "ДЗ_10_1_Фильтр_2": Столбец E (Сумма) -> Числовые фильтры -> Первые 10 -> исправь 10 на 8.
+
+    # Лист "ДЗ_10_1_Фильтр_3": Столбец E (Сумма) -> Числовые фильтры -> Меньше -> впиши 1000000.
+
+    # Лист "ДЗ_10_1_Фильтр_4": Столбец B (Название) -> оставь галочки только на «Профессиональный» и «Профессиональный+».
+
+print("ДЗ 10 Задание 1 готово: созданы листы с таблицами и включены фильтры.")
+# --- КОНЕЦ КОДА ДЛЯ ДЗ 10 ЗАДАНИЕ 1 ---
+
 # Сохранение финального результата
 output_filename = 'Практическая_работа_5.xlsx'
 wb.save(output_filename)
