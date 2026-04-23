@@ -45,30 +45,49 @@ if '4' in wb.sheetnames:
     print("Задание 4 (лист 4): Кнопки фильтра добавлены. (В Excel отсортируй по столбцу 'Торговый представитель' от А до Я)")
 # --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 4 ---
 
+# Если в начале файла еще нет этих импортов, обязательно добавь их:
+from openpyxl.styles import PatternFill, Font, Border, Side, Alignment
+
 # --- НАЧАЛО КОДА ДЛЯ ЗАДАНИЯ 5 ---
 if '5' in wb.sheetnames:
     ws_5 = wb['5']
     
-    # Предполагаем, что таблица стандартная: 
-    # A - Фамилия, B - Стаж, C - Оклад, D - Коэффициент, E - Всего
-    # Проходимся по всем строкам со 2-й (пропуская заголовок) до самого конца таблицы
+    # 1. Настраиваем стили: желтенькая заливка, жирный шрифт, выравнивание по центру и тонкие границы
+    yellow_fill = PatternFill(start_color="FFE699", end_color="FFE699", fill_type="solid") # Приятный желтый цвет
+    bold_font = Font(bold=True)
+    center_align = Alignment(horizontal="center", vertical="center")
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # 2. Красим шапку таблицы (1-я строка, столбцы с A до E)
+    for col_idx in range(1, 6): # Столбцы от 1 (A) до 5 (E)
+        header_cell = ws_5.cell(row=1, column=col_idx)
+        header_cell.fill = yellow_fill
+        header_cell.font = bold_font
+        header_cell.alignment = center_align
+        header_cell.border = thin_border
+    
+    # 3. Проходимся по всем строкам данных (со 2-й до конца)
     for row in range(2, ws_5.max_row + 1):
         
-        # 1. Записываем формулу для Коэффициента (столбец D)
-        # Если стаж (B) > 10, то 2, иначе 1
+        # Записываем формулы
         ws_5[f'D{row}'].value = f'=IF(B{row}>10, 2, 1)'
-        
-        # 2. Записываем формулу для расчета "Всего" (столбец E)
-        # Всего = Коэффициент (D) * Оклад (C)
         ws_5[f'E{row}'].value = f'=D{row}*C{row}'
         
-        # 3. Задаем денежный формат: 0 знаков после запятой, валюта - рубль
-        # Шаблон '#,##0 ₽' сделает красиво: 23670 -> 23 670 ₽
+        # Денежный формат
         currency_format = '#,##0 ₽'
         ws_5[f'C{row}'].number_format = currency_format
         ws_5[f'E{row}'].number_format = currency_format
         
-    print("Задание 5 (лист 5): Формулы премии (ЕСЛИ) и денежные форматы успешно добавлены.")
+        # Добавляем границы (сеточку) для каждой ячейки в строке, как на скрине
+        for col_idx in range(1, 6):
+            ws_5.cell(row=row, column=col_idx).border = thin_border
+            
+    print("Задание 5 (лист 5): Формулы, форматы и желтенькая шапка с границами успешно добавлены!")
 else:
     print("Внимание: Лист '5' не найден!")
 # --- КОНЕЦ КОДА ДЛЯ ЗАДАНИЯ 5 ---
