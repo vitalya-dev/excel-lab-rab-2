@@ -311,7 +311,7 @@ else:
 from openpyxl.styles import PatternFill, Font, Border, Side, Alignment
 from openpyxl.utils import get_column_letter
 
-# 1. Подготавливаем данные из PDF-методички
+# 1. Подготавливаем данные
 dz1_data = [
     ["Факс", "Персональный", 2604, 200],
     ["Факс", "Персональный+", 3774, 120],
@@ -333,19 +333,22 @@ dz1_data = [
     ["Ксерокс", "Деловой", 3600, 432]
 ]
 
-# Стили для красоты
-header_fill_dz = PatternFill(start_color="FFE699", end_color="FFE699", fill_type="solid") # Желтая шапка
+# 2. Настраиваем стили точно по твоему скриншоту (оливково-зеленые тона)
+header_fill_dz = PatternFill(start_color="D7E4BC", end_color="D7E4BC", fill_type="solid") # Оливковая шапка
+data_fill_dz = PatternFill(start_color="EBF1DE", end_color="EBF1DE", fill_type="solid")   # Светло-оливковый фон данных
 bold_font = Font(bold=True)
 center_align = Alignment(horizontal="center", vertical="center")
-thin_border = Border(left=Side(style='thin'), right=Side(style='thin'), 
-                     top=Side(style='thin'), bottom=Side(style='thin'))
 
-# 2. Создаем 5 листов: базу и 4 листа для фильтров по заданию
+# Зеленые границы ячеек, как на фото
+green_side = Side(style='thin', color="76933C")
+green_border = Border(left=green_side, right=green_side, top=green_side, bottom=green_side)
+
+# 3. Создаем 5 листов (база + 4 фильтра)
 sheet_names = [
-    "ДЗ_10_1_Фильтр_1", # Ксероксы, Персональный
-    "ДЗ_10_1_Фильтр_2", # Топ-8 по сумме
-    "ДЗ_10_1_Фильтр_3", # Сумма < 1 000 000
-    "ДЗ_10_1_Фильтр_4"  # Профессиональный и Проф+
+    "ДЗ_10_1_Фильтр_1", 
+    "ДЗ_10_1_Фильтр_2", 
+    "ДЗ_10_1_Фильтр_3", 
+    "ДЗ_10_1_Фильтр_4"  
 ]
 
 for sheet_name in sheet_names:
@@ -358,24 +361,33 @@ for sheet_name in sheet_names:
         cell.fill = header_fill_dz
         cell.font = bold_font
         cell.alignment = center_align
-        cell.border = thin_border
-        # Раздвигаем колонки, чтобы текст влезал
-        ws.column_dimensions[get_column_letter(col_idx)].width = 20
+        cell.border = green_border
+        
+        # Настраиваем ширину столбцов
+        if col_idx == 2:
+            ws.column_dimensions[get_column_letter(col_idx)].width = 22 # Пошире для названий
+        else:
+            ws.column_dimensions[get_column_letter(col_idx)].width = 12
     
-    # Вставляем данные
+    # Вставляем данные и применяем стили
     for row_idx, row_data in enumerate(dz1_data, start=2):
         for col_idx, val in enumerate(row_data, start=1):
             cell = ws.cell(row=row_idx, column=col_idx, value=val)
-            cell.border = thin_border
-            # Формат рублей для Цены
+            cell.border = green_border
+            cell.fill = data_fill_dz
+            cell.alignment = center_align
+            
+            # Формат рублей для Цены (с буквой "р.")
             if col_idx == 3: 
-                cell.number_format = '#,##0 ₽'
+                cell.number_format = '#,##0"р."'
         
         # Считаем Сумму (Цена * Кол-во)
         sum_cell = ws.cell(row=row_idx, column=5)
         sum_cell.value = f'=C{row_idx}*D{row_idx}'
-        sum_cell.number_format = '#,##0 ₽'
-        sum_cell.border = thin_border
+        sum_cell.number_format = '#,##0"р."'
+        sum_cell.border = green_border
+        sum_cell.fill = data_fill_dz
+        sum_cell.alignment = center_align
     
     # Включаем стрелочки автофильтра на всю таблицу
     ws.auto_filter.ref = ws.dimensions
