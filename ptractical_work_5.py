@@ -405,6 +405,133 @@ for sheet_name in sheet_names:
 print("ДЗ 10 Задание 1 готово: созданы листы с таблицами и включены фильтры.")
 # --- КОНЕЦ КОДА ДЛЯ ДЗ 10 ЗАДАНИЕ 1 ---
 
+# --- НАЧАЛО КОДА ДЛЯ ДЗ 10 ЗАДАНИЕ 2 ---
+# Создаем новый лист для последнего задания
+ws_dz2 = wb.create_sheet(title="ДЗ_10_2_Брак")
+from openpyxl.styles import PatternFill, Font, Border, Side, Alignment
+
+# 1. Настраиваем стили
+thin_border = Border(
+    left=Side(style='thin'), right=Side(style='thin'), 
+    top=Side(style='thin'), bottom=Side(style='thin')
+)
+# Цвет шапки - песочно-желтый, как на картинке
+header_fill = PatternFill(start_color="F7CB73", end_color="F7CB73", fill_type="solid")
+# Ярко-желтый для плашки "Выполнил"
+yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+
+center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+right_align = Alignment(horizontal="right", vertical="center")
+
+# 2. Оформляем мини-таблицу слева сверху (строки 1 и 2)
+ws_dz2['A1'] = "Цех"
+ws_dz2['B1'] = "№3"
+ws_dz2['A2'] = "Дата"
+ws_dz2['B2'] = "17.03.2016" # Оставим дату как на скрине
+
+for r in range(1, 3):
+    for c in range(1, 3):
+        ws_dz2.cell(row=r, column=c).border = thin_border
+
+# 3. Желтая плашка "Выполнил..."
+ws_dz2.merge_cells('D2:F2') # Объединяем, чтобы влезло красиво
+ws_dz2['D2'] = "Выполнил Козлов А.В."
+ws_dz2['D2'].fill = yellow_fill
+ws_dz2['D2'].alignment = center_align
+
+# 4. Заголовки основной таблицы (строка 4)
+headers = [
+    "Название\nдетали", "Кол-во,\nшт", "Брак, шт", "Себесто\nимость", 
+    "Сумма", "Брак, %", "Штраф", "Сумма за\nвычетом\nштрафа"
+]
+
+for col_idx, h in enumerate(headers, start=1):
+    cell = ws_dz2.cell(row=4, column=col_idx, value=h)
+    cell.fill = header_fill
+    cell.alignment = center_align
+    cell.border = thin_border
+    
+# Настраиваем ширину столбцов, чтобы текст переносился как надо
+ws_dz2.column_dimensions['A'].width = 12
+ws_dz2.column_dimensions['B'].width = 10
+ws_dz2.column_dimensions['C'].width = 10
+ws_dz2.column_dimensions['D'].width = 12
+ws_dz2.column_dimensions['E'].width = 10
+ws_dz2.column_dimensions['F'].width = 10
+ws_dz2.column_dimensions['G'].width = 10
+ws_dz2.column_dimensions['H'].width = 14
+
+# 5. Исходные данные
+data = [
+    ["Шайба", 120, 20, 10],
+    ["Винт", 100, 25, 14],
+    ["Гайка", 115, 10, 16],
+    ["Болт", 95, 27, 10],
+    ["Шуруп", 87, 12, 15]
+]
+
+# 6. Заполняем данные и прописываем формулы
+start_row = 5
+for i, row_data in enumerate(data):
+    current_row = start_row + i
+    
+    # Вставляем текстовые и числовые значения
+    for col_idx, val in enumerate(row_data, start=1):
+        cell = ws_dz2.cell(row=current_row, column=col_idx, value=val)
+        cell.border = thin_border
+        if col_idx > 1:
+            cell.alignment = center_align
+
+    # Формула: Сумма (E) = Кол-во (B) * Себестоимость (D)
+    ws_dz2[f'E{current_row}'] = f'=B{current_row}*D{current_row}'
+    ws_dz2[f'E{current_row}'].border = thin_border
+    ws_dz2[f'E{current_row}'].alignment = center_align
+    
+    # Формула: Брак % (F) = Брак шт (C) / Кол-во (B)
+    ws_dz2[f'F{current_row}'] = f'=C{current_row}/B{current_row}'
+    ws_dz2[f'F{current_row}'].number_format = '0%' # Превращаем десятичное число в проценты
+    ws_dz2[f'F{current_row}'].border = thin_border
+    ws_dz2[f'F{current_row}'].alignment = center_align
+    
+    # Формула: Штраф (G). Важно: в Excel 10% - это 0.1
+    # Если процент брака (F) > 10% (0.1), то 5% (0.05) * Сумма (E), иначе 0
+    ws_dz2[f'G{current_row}'] = f'=IF(F{current_row}>0.1, 0.05*E{current_row}, 0)'
+    ws_dz2[f'G{current_row}'].border = thin_border
+    ws_dz2[f'G{current_row}'].alignment = center_align
+    
+    # Формула: Сумма за вычетом (H) = Сумма (E) - Штраф (G)
+    ws_dz2[f'H{current_row}'] = f'=E{current_row}-G{current_row}'
+    ws_dz2[f'H{current_row}'].border = thin_border
+    ws_dz2[f'H{current_row}'].alignment = center_align
+
+# 7. Финальные строки "Итого" и "К выдаче"
+total_row = start_row + len(data)      # 10-я строка
+payout_row = start_row + len(data) + 1  # 11-я строка
+
+# Объединяем ячейки A-G для "Итого"
+ws_dz2.merge_cells(f'A{total_row}:G{total_row}')
+ws_dz2[f'A{total_row}'] = "Итого"
+ws_dz2[f'A{total_row}'].alignment = right_align
+# Сумма по столбцу H
+ws_dz2[f'H{total_row}'] = f'=SUM(H{start_row}:H{total_row-1})'
+
+# Объединяем ячейки A-G для "К выдаче"
+ws_dz2.merge_cells(f'A{payout_row}:G{payout_row}')
+ws_dz2[f'A{payout_row}'] = "К выдаче"
+ws_dz2[f'A{payout_row}'].alignment = right_align
+# 7% от Итого (H10)
+ws_dz2[f'H{payout_row}'] = f'=0.07*H{total_row}'
+
+# Рисуем рамки для объединенных нижних строк (openpyxl требует обводить каждую ячейку в слиянии)
+for r in [total_row, payout_row]:
+    for c in range(1, 9):
+        ws_dz2.cell(row=r, column=c).border = thin_border
+        if c == 8: # Выравниваем результаты
+            ws_dz2.cell(row=r, column=c).alignment = center_align
+
+print("ДЗ 10 Задание 2 готово: расчет брака, штрафов и итогов завершен!")
+# --- КОНЕЦ КОДА ДЛЯ ДЗ 10 ЗАДАНИЕ 2 ---
+
 # Сохранение финального результата
 output_filename = 'Практическая_работа_5.xlsx'
 wb.save(output_filename)

@@ -5,9 +5,12 @@ from openpyxl.chart import (
     PieChart, 
     PieChart3D, 
     ScatterChart, 
+    SurfaceChart3D, # <--- ДОБАВИЛИ ЭТО
     Reference, 
     Series
 )
+# Дополнительный импорт для работы с буквами колонок
+from openpyxl.utils import get_column_letter
 from openpyxl.chart.label import DataLabelList
 from typing import cast
 from openpyxl.worksheet.worksheet import Worksheet
@@ -318,8 +321,70 @@ chart_dz2.series.append(series_dz2)
 ws_dz2.add_chart(chart_dz2, "D2")
 
 # ==========================================
+# ДЗ 9. ЗАДАНИЕ 3*: ПОВЕРХНОСТЬ z = x² + y²
+# ==========================================
+ws_dz3 = cast(Worksheet, wb.create_sheet(title="ДЗ 9 Задание 3"))
+
+# Генерируем массив значений от -1.0 до 1.0 с шагом 0.2
+axis_values = [round(-1.0 + i * 0.2, 1) for i in range(11)]
+
+# 1. Заполняем "шапку" таблицы (Y)
+for col_idx, y_val in enumerate(axis_values, start=2):
+    cell = cast(Cell, ws_dz3.cell(row=1, column=col_idx))
+    cell.value = y_val
+    cell.font = Font(bold=True)
+    cell.alignment = Alignment(horizontal='center')
+
+# 2. Заполняем "боковик" таблицы (X)
+for row_idx, x_val in enumerate(axis_values, start=2):
+    cell = cast(Cell, ws_dz3.cell(row=row_idx, column=1))
+    cell.value = x_val
+    cell.font = Font(bold=True)
+    cell.alignment = Alignment(horizontal='center')
+
+# 3. Заполняем матрицу формулами
+for row_idx in range(2, 13):
+    for col_idx in range(2, 13):
+        col_letter = get_column_letter(col_idx)
+        # Формула =B$1^2+$A2^2
+        formula = f'={col_letter}$1^2+$A{row_idx}^2'
+        
+        cell = cast(Cell, ws_dz3.cell(row=row_idx, column=col_idx))
+        cell.value = formula
+        cell.number_format = '0.00'
+
+for col_idx in range(1, 13):
+    ws_dz3.column_dimensions[get_column_letter(col_idx)].width = 6
+
+# 4. СТРОИМ НАСТОЯЩУЮ 3D ПОВЕРХНОСТЬ
+surface_chart = SurfaceChart3D()
+surface_chart.title = "Поверхность z = x\u00B2 + y\u00B2"
+
+# ВАЖНО: Задаем стиль, который отвечает за градиентные заливки уровней (как на скрине)
+surface_chart.style = 15
+
+# Данные для поверхности
+data_ref = Reference(ws_dz3, min_col=2, min_row=1, max_col=12, max_row=12)
+cats_ref = Reference(ws_dz3, min_col=1, min_row=2, max_row=12)
+
+surface_chart.add_data(data_ref, titles_from_data=True)
+surface_chart.set_categories(cats_ref)
+
+# --- МАГИЯ 3D КАМЕРЫ ---
+# Настраиваем угол обзора, чтобы смотреть на "чашу" чуть сверху и сбоку, как на твоем фото
+if surface_chart.view3D:
+    surface_chart.view3D.rotX = 20  # Наклон по оси X (вверх-вниз)
+    surface_chart.view3D.rotY = 30  # Поворот по оси Y (влево-вправо)
+# -----------------------
+
+surface_chart.width = 16
+surface_chart.height = 12
+
+ws_dz3.add_chart(surface_chart, "N2")
+
+# ==========================================
 # ФИНАЛЬНОЕ СОХРАНЕНИЕ
 # ==========================================
-filename = 'Практическая_работа_4_с_ДЗ.xlsx'
+filename = 'Практическая_работа_4_Итог.xlsx'
 wb.save(filename)
-print(f'Бро, все готово! Файл "{filename}" создан. Все задания и домашка внутри!')
+print(f'Квест пройден, бро! Файл "{filename}" готов. 3D-поверхность выглядит огненно!')
